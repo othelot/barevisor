@@ -24,16 +24,16 @@ impl Epts {
 
         let mut pa = 0u64;
 
-        self.pml4.0.entries[0].set_readable(true);
-        self.pml4.0.entries[0].set_writable(true);
-        self.pml4.0.entries[0].set_executable(true);
-        self.pml4.0.entries[0].set_pfn(ops.pa(addr_of!(self.pdpt) as _) >> BASE_PAGE_SHIFT);
-        for (i, pdpte) in self.pdpt.0.entries.iter_mut().enumerate() {
+        self.pml4.entries[0].set_readable(true);
+        self.pml4.entries[0].set_writable(true);
+        self.pml4.entries[0].set_executable(true);
+        self.pml4.entries[0].set_pfn(ops.pa(addr_of!(self.pdpt) as _) >> BASE_PAGE_SHIFT);
+        for (i, pdpte) in self.pdpt.entries.iter_mut().enumerate() {
             pdpte.set_readable(true);
             pdpte.set_writable(true);
             pdpte.set_executable(true);
             pdpte.set_pfn(ops.pa(addr_of!(self.pd[i]) as _) >> BASE_PAGE_SHIFT);
-            for pde in &mut self.pd[i].0.entries {
+            for pde in &mut self.pd[i].entries {
                 if pa == 0 {
                     // First 2MB is managed by 4KB EPT PTs so MTRR memory types
                     // are properly reflected into the EPT memory memory types.
@@ -41,7 +41,7 @@ impl Epts {
                     pde.set_writable(true);
                     pde.set_executable(true);
                     pde.set_pfn(ops.pa(addr_of!(self.pt) as _) >> BASE_PAGE_SHIFT);
-                    for pte in &mut self.pt.0.entries {
+                    for pte in &mut self.pt.entries {
                         let memory_type =
                             mtrr.find(pa..pa + BASE_PAGE_SIZE as u64)
                                 .unwrap_or_else(|| {
@@ -112,22 +112,15 @@ bitfield::bitfield! {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct Pml4(Table);
-
-#[derive(Debug, Clone, Copy)]
-struct Pdpt(Table);
-
-#[derive(Debug, Clone, Copy)]
-struct Pd(Table);
-
-#[derive(Debug, Clone, Copy)]
-struct Pt(Table);
-
-#[derive(Debug, Clone, Copy)]
 #[repr(C, align(4096))]
 struct Table {
     entries: [Entry; 512],
 }
+
+use Table as Pml4;
+use Table as Pdpt;
+use Table as Pd;
+use Table as Pt;
 
 bitfield::bitfield! {
     /// Figure 29-1. Formats of EPTP and EPT Paging-Structure Entries

@@ -41,22 +41,15 @@ impl PagingStructuresRaw {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct Pml4(pub(crate) Table);
-
-#[derive(Debug, Clone, Copy)]
-pub(crate) struct Pdpt(pub(crate) Table);
-
-#[derive(Debug, Clone, Copy)]
-pub(crate) struct Pd(pub(crate) Table);
-
-#[derive(Debug, Clone, Copy)]
-pub(crate) struct Pt(pub(crate) Table);
-
-#[derive(Debug, Clone, Copy)]
 #[repr(C, align(4096))]
 pub(crate) struct Table {
     pub(crate) entries: [Entry; 512],
 }
+
+pub(crate) use Table as Pml4;
+pub(crate) use Table as Pdpt;
+pub(crate) use Table as Pd;
+pub(crate) use Table as Pt;
 
 bitfield::bitfield! {
     #[derive(Clone, Copy)]
@@ -74,18 +67,18 @@ pub(crate) fn build_identity_internal(ps: &mut PagingStructuresRaw, npt: bool) {
     let user = npt;
 
     let pml4 = &mut ps.pml4;
-    pml4.0.entries[0].set_present(true);
-    pml4.0.entries[0].set_writable(true);
-    pml4.0.entries[0].set_user(user);
-    pml4.0.entries[0].set_pfn(ops.pa(addr_of!(ps.pdpt) as _) >> BASE_PAGE_SHIFT);
+    pml4.entries[0].set_present(true);
+    pml4.entries[0].set_writable(true);
+    pml4.entries[0].set_user(user);
+    pml4.entries[0].set_pfn(ops.pa(addr_of!(ps.pdpt) as _) >> BASE_PAGE_SHIFT);
 
     let mut pa = 0;
-    for (i, pdpte) in ps.pdpt.0.entries.iter_mut().enumerate() {
+    for (i, pdpte) in ps.pdpt.entries.iter_mut().enumerate() {
         pdpte.set_present(true);
         pdpte.set_writable(true);
         pdpte.set_user(user);
         pdpte.set_pfn(ops.pa(addr_of!(ps.pd[i]) as _) >> BASE_PAGE_SHIFT);
-        for pde in &mut ps.pd[i].0.entries {
+        for pde in &mut ps.pd[i].entries {
             // The first 2MB is mapped with 4KB pages if it is not for NPT. This
             // is to make the zero page non-present and cause #PF in case of null
             // pointer access. Helps debugging. All other pages are 2MB mapped.
@@ -94,7 +87,7 @@ pub(crate) fn build_identity_internal(ps: &mut PagingStructuresRaw, npt: bool) {
                 pde.set_writable(true);
                 pde.set_user(user);
                 pde.set_pfn(ops.pa(addr_of!(ps.pt) as _) >> BASE_PAGE_SHIFT);
-                for pte in &mut ps.pt.0.entries {
+                for pte in &mut ps.pt.entries {
                     pte.set_present(true);
                     pte.set_writable(true);
                     pte.set_user(user);
@@ -102,7 +95,7 @@ pub(crate) fn build_identity_internal(ps: &mut PagingStructuresRaw, npt: bool) {
                     pa += BASE_PAGE_SIZE as u64;
                 }
                 // Make the null page invalid to detect null pointer access.
-                ps.pt.0.entries[0].set_present(false);
+                ps.pt.entries[0].set_present(false);
             } else {
                 pde.set_present(true);
                 pde.set_writable(true);

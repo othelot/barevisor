@@ -279,7 +279,7 @@ impl SvmGuest {
 
         let mut npt = SHARED_GUEST_DATA.npt.write();
         let pt = npt.apic_pt();
-        pt.0.entries[pt_index].set_writable(!enable);
+        pt.entries[pt_index].set_writable(!enable);
 
         // Other processors will have stale TLB entries as we do not do TLB
         // shootdown. It is fine because APIC writes we want to see are done by

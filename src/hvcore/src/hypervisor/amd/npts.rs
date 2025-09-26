@@ -38,7 +38,7 @@ impl NestedPageTables {
 
         let pdpt_index = apic_base.get_bits(30..=38) as usize; // [38:30]
         let pd_index = apic_base.get_bits(21..=29) as usize; // [29:21]
-        let pde = &mut self.ptr.pd[pdpt_index].0.entries[pd_index];
+        let pde = &mut self.ptr.pd[pdpt_index].entries[pd_index];
         Self::split_2mb(pde, &mut self.ptr.pt_apic);
     }
 
@@ -50,7 +50,7 @@ impl NestedPageTables {
         let writable = pde.writable();
         let user = pde.user();
         let mut pfn = pde.pfn();
-        for pte in &mut pt.0.entries {
+        for pte in &mut pt.entries {
             assert!(!pte.present());
             pte.set_present(true);
             pte.set_writable(writable);
