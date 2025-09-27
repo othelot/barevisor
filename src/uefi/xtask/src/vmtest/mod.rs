@@ -1,6 +1,6 @@
 use std::{path::Path, process::Command};
 
-use anyhow::{ensure, Result};
+use anyhow::{Result, ensure};
 
 use crate::{build, cargo::Package, output_dir, project_root_dir};
 

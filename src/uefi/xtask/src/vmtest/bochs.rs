@@ -10,7 +10,7 @@ use std::{
 
 use anyhow::Result;
 
-use super::{copy_artifacts_to, TestVm, UnixCommand};
+use super::{TestVm, UnixCommand, copy_artifacts_to};
 
 pub(crate) struct Bochs {
     pub(crate) cpu: Cpu,
@@ -23,24 +23,26 @@ impl TestVm for Bochs {
 
     fn run(&self) -> Result<()> {
         // Start a threads that tries to connect to Bochs in an infinite loop.
-        let _unused = thread::spawn(|| loop {
-            thread::sleep(Duration::from_secs(1));
-            #[expect(clippy::zombie_processes)]
-            let process = UnixCommand::new("nc")
-                .args(["localhost", "14449"])
-                .stdout(Stdio::piped())
-                .stdin(Stdio::piped())
-                .spawn()
-                .unwrap();
+        let _unused = thread::spawn(|| {
+            loop {
+                thread::sleep(Duration::from_secs(1));
+                #[expect(clippy::zombie_processes)]
+                let process = UnixCommand::new("nc")
+                    .args(["localhost", "14449"])
+                    .stdout(Stdio::piped())
+                    .stdin(Stdio::piped())
+                    .spawn()
+                    .unwrap();
 
-            let now = SystemTime::now();
-            let reader = BufReader::new(process.stdout.unwrap());
-            reader.lines().map_while(Result::ok).for_each(|line| {
-                println!(
-                    "{:>4}: {line}\r",
-                    now.elapsed().unwrap_or_default().as_secs()
-                );
-            });
+                let now = SystemTime::now();
+                let reader = BufReader::new(process.stdout.unwrap());
+                reader.lines().map_while(Result::ok).for_each(|line| {
+                    println!(
+                        "{:>4}: {line}\r",
+                        now.elapsed().unwrap_or_default().as_secs()
+                    );
+                });
+            }
         });
 
         let cpu_type = self.cpu.to_string().to_lowercase();

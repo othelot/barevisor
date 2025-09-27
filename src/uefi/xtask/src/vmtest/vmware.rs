@@ -8,10 +8,10 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-use anyhow::{ensure, Result};
+use anyhow::{Result, ensure};
 use vnc::client::AuthChoice;
 
-use super::{copy_artifacts_to, TestVm, UnixCommand};
+use super::{TestVm, UnixCommand, copy_artifacts_to};
 
 pub(crate) struct Vmware;
 

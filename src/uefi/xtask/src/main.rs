@@ -10,7 +10,7 @@ use std::{
 };
 
 use anyhow::Result;
-use cargo::{cargo_run, Action, Package, Profile};
+use cargo::{Action, Package, Profile, cargo_run};
 use clap::{Parser, Subcommand};
 use vmtest::{
     bochs::{Bochs, Cpu},

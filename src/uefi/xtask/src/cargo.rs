@@ -1,6 +1,6 @@
 use std::{env, fs, path::PathBuf, process::Command};
 
-use anyhow::{ensure, Result};
+use anyhow::{Result, ensure};
 
 use crate::{output_dir, project_root_dir};
 
