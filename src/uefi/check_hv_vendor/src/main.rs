@@ -57,11 +57,11 @@ fn run_on_all_processors(callback: fn()) -> uefi::Result<()> {
     // The API may return NOT_STARTED if there is no AP on the system. Treat it
     // as ok and all other failures as error.
     if let Err(e) = mp_services.startup_all_aps(true, run_callback, callback as *mut _, None, None)
+        && e.status() != Status::NOT_STARTED
     {
-        if e.status() != Status::NOT_STARTED {
-            return Err(e);
-        }
+        return Err(e);
     }
+
     Ok(())
 }
 
