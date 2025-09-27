@@ -50,7 +50,7 @@ Set up a Bochs VM with the following instructions:
 - <details markdown="block"><summary>On Ubuntu and Windows (WSL)</summary>
 
     ```
-    $ sudo apt install build-essential p7zip-full mtools genisoimage
+    $ sudo apt install build-essential p7zip-full mtools genisoimage libltdl-dev
     $ git clone -b barevisor https://github.com/tandasat/Bochs.git
     $ cd Bochs/bochs
     $ sh .conf.linux
