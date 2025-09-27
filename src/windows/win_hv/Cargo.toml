@@ -22,12 +22,12 @@ bench = false
 
 [dependencies]
 hv = { path = "../../hvcore" }
-spin = "0.9.8"
-wdk = "0.3.0"
-wdk-sys = "0.3.0"
+spin = "0.10.0"
+wdk = "0.3.1"
+wdk-sys = "0.4.0"
 
 [build-dependencies]
-wdk-build = "0.3.0"
+wdk-build = "0.4.0"
 
 [package.metadata.wdk.driver-model]
 driver-type = "KMDF"

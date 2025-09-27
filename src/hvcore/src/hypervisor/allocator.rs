@@ -97,7 +97,7 @@ fn dealloc_internal<const BLOCK_COUNT: usize, const BLOCK_SIZE: usize, const BIT
 
 fn round_up_by(number: usize, size: usize) -> usize {
     let round_down = number / size;
-    if number % size != 0 {
+    if !number.is_multiple_of(size) {
         round_down + 1
     } else {
         round_down
@@ -144,7 +144,7 @@ unsafe impl Sync for Metadata {}
 impl Metadata {
     fn new(ptr: *mut u8) -> Self {
         assert!(!ptr.is_null());
-        assert!((ptr as usize) % core::mem::align_of::<Self>() == 0);
+        assert!((ptr as usize).is_multiple_of(core::mem::align_of::<Self>()));
         #[expect(clippy::cast_ptr_alignment)]
         let blocks = ptr.cast::<Blocks>();
         Self {

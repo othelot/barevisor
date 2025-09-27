@@ -3,9 +3,9 @@
 
 use hv::platform_ops::PlatformOps;
 use wdk_sys::{
-    ALL_PROCESSOR_GROUPS, APC_LEVEL, GROUP_AFFINITY, NT_SUCCESS, PAGED_CODE, PROCESSOR_NUMBER,
+    ALL_PROCESSOR_GROUPS, GROUP_AFFINITY, NT_SUCCESS, PAGED_CODE, PROCESSOR_NUMBER,
     ntddk::{
-        KeGetCurrentIrql, KeGetProcessorNumberFromIndex, KeQueryActiveProcessorCountEx,
+        KeGetProcessorNumberFromIndex, KeQueryActiveProcessorCountEx,
         KeRevertToUserGroupAffinityThread, KeSetSystemGroupAffinityThread, MmGetPhysicalAddress,
     },
 };
@@ -22,7 +22,7 @@ impl PlatformOps for WindowsOps {
 
         for index in 0..processor_count() {
             let mut processor_number = PROCESSOR_NUMBER::default();
-            let status = unsafe { KeGetProcessorNumberFromIndex(index, &mut processor_number) };
+            let status = unsafe { KeGetProcessorNumberFromIndex(index, &raw mut processor_number) };
             assert!(NT_SUCCESS(status));
 
             let mut old_affinity = GROUP_AFFINITY::default();
@@ -31,11 +31,11 @@ impl PlatformOps for WindowsOps {
                 Mask: 1 << processor_number.Number,
                 Reserved: [0, 0, 0],
             };
-            unsafe { KeSetSystemGroupAffinityThread(&mut affinity, &mut old_affinity) };
+            unsafe { KeSetSystemGroupAffinityThread(&raw mut affinity, &raw mut old_affinity) };
 
             callback();
 
-            unsafe { KeRevertToUserGroupAffinityThread(&mut old_affinity) };
+            unsafe { KeRevertToUserGroupAffinityThread(&raw mut old_affinity) };
         }
     }
 
