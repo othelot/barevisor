@@ -46,11 +46,10 @@ impl log::Log for SerialLogger {
             // Disable interrupt while acquiring the mutex, to reduce the chance
             // of reentering this code.
             let _intr_guard = InterruptGuard::new();
-            let _apic_id = apic_id();
+            let id = apic_id();
             let mut uart = self.port.lock();
             let _ = uart.write_fmt(format_args!(
-                "#{}:{:5}: {}\n",
-                _apic_id,
+                "#{id}:{:5}: {}\n",
                 record.level(),
                 record.args()
             ));
